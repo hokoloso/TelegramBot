@@ -31,3 +31,13 @@ async def delete_task(task_id):
     async with async_session() as session:
         await session.execute(delete(Task).where(Task.task_id==task_id))
         await session.commit()
+
+async def update_status(task_id):
+    async with async_session() as session:
+        async with session.begin():
+            result = await session.execute(
+                update(Task).where(Task.task_id == task_id).values(status=True)
+            )
+            await session.commit()
+            if result.rowcount == 0:
+                raise Exception("Задача не была найдена.")
