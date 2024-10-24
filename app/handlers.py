@@ -3,7 +3,7 @@ from aiogram.types import Message
 from aiogram.filters import CommandStart
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-
+import re
 import logging
 
 import keybords as kb
@@ -36,9 +36,14 @@ async def add_task_first(message: Message, state: FSMContext):
 
 @router.message(Task.date)
 async def add_task_second(message: Message, state: FSMContext):
-    await state.update_data(date=message.text)  
-    await state.set_state(Task.description)
-    await message.answer('Введите задачу')
+    date_pattern = r'^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}$'
+    
+    if re.match(date_pattern, message.text):
+        await state.update_data(date=message.text)
+        await state.set_state(Task.description)
+        await message.answer('Введите задачу')
+    else:
+        await message.answer('Неверный формат даты. Пожалуйста, введите дату и время в формате ДД.ММ.ГГГГ ЧЧ:ММ')
 
 @router.message(Task.description)
 async def add_task_third(message: Message, state: FSMContext):
